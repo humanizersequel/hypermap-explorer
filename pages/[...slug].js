@@ -141,9 +141,9 @@ export default function EntryPage() {
   }
 
   // --- Display the Fetched Entry Data ---
+  const ROOT_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
   const entryPathForLink = entryData.fullName ? entryData.fullName.split('.').reverse().join('/') : '';
   const parentPathForLink = entryData.parentHash !== ROOT_HASH && entryData.fullName ? entryData.fullName.split('.').slice(1).join('.').split('.').reverse().join('/') : '';
-  const ROOT_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
   return (
     <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6' }}>
