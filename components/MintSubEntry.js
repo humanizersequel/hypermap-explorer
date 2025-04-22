@@ -47,6 +47,7 @@ export default function MintSubEntry({ parentNamespace }) {
     // Construct the full name (e.g., "data.nick.hypr")
     const fullNodeName = `${trimmedLabel}.${parentNamespace}`;
     console.log(`Attempting to mint: ${fullNodeName}`);
+    console.log('Final node name before encoding:', JSON.stringify(fullNodeName));
 
     // Arguments array for the 'mint' function call:
     // mint(address owner, bytes calldata node, bytes calldata data, address implementation)

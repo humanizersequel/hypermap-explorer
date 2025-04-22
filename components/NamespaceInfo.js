@@ -6,6 +6,7 @@ import { BASE_CHAIN_ID } from '../lib/constants';
 import MintSubEntry from './MintSubEntry';
 
 // This component expects the 'slug' array from the URL, e.g., ['nick', 'hypr']
+// reviewers note: the url paths are "backwards" to how they are referenced in the protocol. Nick.hypr will live at the slash hypr slash nick path
 export default function NamespaceInfo({ slug }) {
   const { address: connectedAddress, isConnected } = useAccount(); // Get wallet connection status
   const currentChainId = useChainId(); // Get the currently connected chain ID
