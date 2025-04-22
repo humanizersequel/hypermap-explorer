@@ -1,8 +1,11 @@
-// pages/[...slug].js
+// hypermap-web-explorer/hypermap-explorer/pages/[...slug].js
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+// Import our custom NamespaceInfo component
+import NamespaceInfo from '../components/NamespaceInfo';
 
 // Helper component to render notes/facts section
 function RenderNotesOrFacts({ title, items }) {
@@ -52,7 +55,7 @@ function RenderNotesOrFacts({ title, items }) {
 // Main Page Component
 export default function EntryPage() {
   const router = useRouter();
-  // slug is undefined on initial render, then becomes an array on hydration
+  // 'slug' from router.query will be an array of path segments, or undefined initially
   const { slug } = router.query;
 
   // State for the fetched data, loading status, and errors
@@ -122,89 +125,98 @@ export default function EntryPage() {
 
   }, [slug, router.isReady]); // Dependency array: re-run effect if slug or router readiness changes
 
-  // --- Render Logic ---
-
-  // Display loading message
-  if (loading && router.isReady) { // Only show loading after router is ready
-    return <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>Loading entry data for /{apiPath}...</div>;
+  // Basic loading state while router is not ready or slug is missing
+  if (!router.isReady) {
+    return <div style={{ padding: '20px' }}>Loading page data...</div>;
   }
 
-  // Display error message
-  if (error) {
-    return <div style={{ fontFamily: 'sans-serif', padding: '20px', color: 'red' }}>Error loading entry data for /{apiPath || 'path'}: {error}</div>;
-  }
+  // Handle case where slug might be ready but invalid (e.g., non-array - though unlikely with [...slug].js)
+  if (!Array.isArray(slug) || slug.length === 0) {
+       // You could redirect or show a specific message for root/invalid paths if needed
+       // For now, just indicate it's not a valid entry path based on slug.
+       return (
+           <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6', maxWidth: '960px', margin: '0 auto' }}>
+               <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid #ddd' }}>
+                   <Link href="/">Back to Home</Link>
+                   <ConnectButton />
+               </header>
+               <p>Invalid Hypermap path.</p>
+           </div>
+       );
+   }
 
-  // Display "Not Found" or "No Data" message (covers API 404 or unexpected empty data)
-  if (!entryData) {
-    // Avoid showing this briefly before loading starts
-    return router.isReady ? <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>No data found for path: /{apiPath || slug?.join('/') || ''}.</div> : null;
-  }
-
-  // --- Display the Fetched Entry Data ---
-  const ROOT_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
-  const entryPathForLink = entryData.fullName ? entryData.fullName.split('.').reverse().join('/') : '';
-  const parentPathForLink = entryData.parentHash !== ROOT_HASH && entryData.fullName ? entryData.fullName.split('.').slice(1).join('.').split('.').reverse().join('/') : '';
+  const path = slug.join('/'); // Reconstruct the display path e.g., "nick/hypr"
 
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6' }}>
+    <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6', maxWidth: '960px', margin: '0 auto' }}>
       <Head>
-        {/* Set page title dynamically */}
-        <title>Hypermap: {entryData.fullName || entryData.namehash}</title>
+        <title>Hypermap: /{path}</title>
+        <meta name="description" content={`Exploring the Hypermap namespace entry /${path} on Base`} />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <nav style={{ marginBottom: '20px', fontSize: '0.9em' }}>
-         {/* Link back to the explorer home page */}
-         <Link href="/" style={{ marginRight: '15px' }}>[Explorer Home]</Link>
-         {/* Link to parent if it's not the root */}
-         {entryData.parentHash && entryData.parentHash !== ROOT_HASH && parentPathForLink ? (
-             <Link href={`/${parentPathForLink}`}>[Up to Parent]</Link>
-         ) : null}
-      </nav>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid #ddd' }}>
+         <Link href="/">← Back to Home</Link>
+         <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon"/>
+      </header>
 
-      {/* Display core entry details */}
-      <h1>Entry: {entryData.fullName || '(Root)'}</h1>
-      <div style={{ background: '#f0f0f0', padding: '15px', borderRadius: '5px', marginBottom: '20px' }}>
-          <p style={{margin: '5px 0'}}><strong>Namehash:</strong> <code>{entryData.namehash}</code></p>
-          <p style={{margin: '5px 0'}}><strong>Label:</strong> {entryData.label || '(Root)'}</p>
-          <p style={{margin: '5px 0'}}><strong>Full Name:</strong> {entryData.fullName || '(Root)'}</p>
-          <p style={{margin: '5px 0'}}><strong>Owner:</strong> <code>{entryData.owner || 'N/A'}</code></p>
-          <p style={{margin: '5px 0'}}><strong>Gene:</strong> <code>{entryData.gene || 'N/A'}</code></p>
-          <p style={{margin: '5px 0'}}><strong>Creation Block:</strong> {entryData.creationBlock}</p>
-          <p style={{margin: '5px 0'}}><strong>Last Update Block:</strong> {entryData.lastUpdateBlock}</p>
-      </div>
+      <main>
+        {/* Pass the validated slug array to the NamespaceInfo component */}
+        <NamespaceInfo slug={slug} />
 
+        {/* Display the original entry details including notes, facts, and children */}
+        {loading && (
+          <div style={{ marginTop: '30px' }}>
+            <p>Loading entry details...</p>
+          </div>
+        )}
 
-      {/* Display Notes and Facts using the helper component */}
-      <RenderNotesOrFacts title="Notes" items={entryData.notes} />
-      <RenderNotesOrFacts title="Facts" items={entryData.facts} />
+        {error && (
+          <div style={{ marginTop: '30px', color: 'red' }}>
+            <p>Error loading entry details: {error}</p>
+          </div>
+        )}
 
-      {/* Display Children */}
-      <h2>Children</h2>
-      {entryData.children && entryData.children.length > 0 ? (
-        <ul style={{ listStyle: 'none', paddingLeft: '10px' }}>
-          {entryData.children.map(child => {
-              // Construct the URL path from the child's full name
-              const childUrlPath = child.fullName ? child.fullName.split('.').reverse().join('/') : null;
-              return (
-                  <li key={child.namehash} style={{ margin: '5px 0' }}>
-                      {childUrlPath ? (
-                          <Link href={`/${childUrlPath}`}>
-                              {/* Display child label, fallback to truncated hash */}
-                              {child.label || child.namehash.substring(0, 10)}
-                          </Link>
-                      ) : (
-                          // If child full name missing (shouldn't happen often with filtering), just show label/hash
-                          <span>{child.label || child.namehash.substring(0, 10)}</span>
-                      )}
-                      {' '} {/* Space */}
-                      (<code style={{fontSize:'0.8em', color:'#555'}}>{child.namehash}</code>)
-                  </li>
-              );
-          })}
-        </ul>
-      ) : (
-        <p>None</p>
-      )}
+        {entryData && !loading && !error && (
+          <div style={{ marginTop: '30px' }}>
+            {/* Notes and Facts */}
+            <RenderNotesOrFacts title="Notes" items={entryData.notes} />
+            <RenderNotesOrFacts title="Facts" items={entryData.facts} />
+
+            {/* Display Children */}
+            <h2>Children</h2>
+            {entryData.children && entryData.children.length > 0 ? (
+              <ul style={{ listStyle: 'none', paddingLeft: '10px' }}>
+                {entryData.children.map(child => {
+                    // Construct the URL path from the child's full name
+                    const childUrlPath = child.fullName ? child.fullName.split('.').reverse().join('/') : null;
+                    return (
+                        <li key={child.namehash} style={{ margin: '5px 0' }}>
+                            {childUrlPath ? (
+                                <Link href={`/${childUrlPath}`}>
+                                    {/* Display child label, fallback to truncated hash */}
+                                    {child.label || child.namehash.substring(0, 10)}
+                                </Link>
+                            ) : (
+                                // If child full name missing (shouldn't happen often with filtering), just show label/hash
+                                <span>{child.label || child.namehash.substring(0, 10)}</span>
+                            )}
+                            {' '} {/* Space */}
+                            (<code style={{fontSize:'0.8em', color:'#555'}}>{child.namehash}</code>)
+                        </li>
+                    );
+                })}
+              </ul>
+            ) : (
+              <p>None</p>
+            )}
+          </div>
+        )}
+      </main>
+
+       <footer style={{marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '0.9em', color: '#777', textAlign: 'center'}}>
+         Hypermap Explorer on Base
+       </footer>
     </div>
   );
 }
