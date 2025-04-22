@@ -21,9 +21,10 @@ export default function NamespaceInfo({ slug }) {
   useEffect(() => {
     // Only run if slug is a valid array with content
     if (slug && Array.isArray(slug) && slug.length > 0) {
-      // Reconstruct the full name (e.g., 'nick.hypr') from the slug array
-      const calculatedFullName = slug.join('.');
-      setFullName(calculatedFullName);
+      // Note: We previously calculated fullName here as slug.join('.')
+      // but now we get the correct fullName directly from the API response
+      // Instead, we'll just set a temporary display value until API responds
+      setFullName(''); // Will be set from API response after fetch
 
       // Define the async function to fetch data
       const fetchEntryData = async () => {
@@ -60,6 +61,18 @@ export default function NamespaceInfo({ slug }) {
           const fetchedEntry = data[namehash];
           console.log("API Data Received:", fetchedEntry);
           setEntryData(fetchedEntry); // Store the fetched entry data in state
+
+          // --- CORRECTED fullName SETTING ---
+          // Use the fullName directly from the API response
+          if (fetchedEntry.fullName) {
+            setFullName(fetchedEntry.fullName); // Set state from API data
+            console.log('Set fullName state from API:', fetchedEntry.fullName);
+          } else {
+            // Fallback or error if API didn't provide fullName
+            console.warn("API response missing fullName field.");
+            setFullName(''); // Clear or handle as appropriate
+          }
+          // --- END CORRECTION ---
 
           // ** Ownership Check (Simplified) **
           // Compare owner from API with connected address directly here
