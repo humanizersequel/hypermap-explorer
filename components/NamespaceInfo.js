@@ -97,10 +97,10 @@ export default function NamespaceInfo({ slug }) {
   // --- Render Logic ---
   // Handle loading and error states first
   if (!slug || slug.length === 0) return <div style={{padding: '20px', color: '#555'}}>Enter a valid Hypermap path in the URL (e.g., /nick/hypr).</div>;
-  if (isLoadingApi) return <div style={{padding: '20px'}}>Loading entry data for '{fullName}'...</div>;
+  if (isLoadingApi) return <div style={{padding: '20px'}}>Loading entry data for &apos;{fullName}&apos;...</div>;
   if (apiError) return <div style={{padding: '20px', color: 'red'}}>Error loading data: {apiError}</div>;
   // Handle case where API call finished but found no data (404 was likely handled by API, but check state too)
-  if (!entryData) return <div style={{padding: '20px'}}>Namespace '{fullName}' not found.</div>;
+  if (!entryData) return <div style={{padding: '20px'}}>Namespace &apos;{fullName}&apos; not found.</div>;
 
   // If data is loaded, extract details for display
   const { namehash, owner, label } = entryData;
