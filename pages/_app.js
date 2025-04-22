@@ -6,7 +6,7 @@ import { getDefaultConfig, RainbowKitProvider, lightTheme } from '@rainbow-me/ra
 import { WagmiProvider } from 'wagmi';
 import { base } from 'wagmi/chains'; // Import the Base chain configuration
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { http } from 'wagmi/transports'; // Import http transport for custom RPC
+import { http } from 'viem'; // Import http transport for custom RPC
 
 // --- Environment Variable Retrieval ---
 // Fetch keys from process.env - NEXT_PUBLIC_ prefix is crucial here!
