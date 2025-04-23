@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useChainId } from 'wagmi'; // Only need useAccount and useChainId from wagmi here
 import { BASE_CHAIN_ID } from '../lib/constants';
-// Import the minting component we will create next
+// Import components
 import MintSubEntry from './MintSubEntry';
+import AddNote from './AddNote'; // <-- IMPORT AddNote
+import AddFact from './AddFact'; // <-- IMPORT AddFact
 
 // This component expects the 'slug' array from the URL, e.g., ['nick', 'hypr']
 // reviewers note: the url paths are "backwards" to how they are referenced in the protocol. Nick.hypr will live at the slash hypr slash nick path
@@ -190,7 +192,18 @@ export default function NamespaceInfo({ slug }) {
                parentNamespace={fullName} // Pass the full name (e.g., "nick.hypr")
                parentTbaAddress={parentTbaForMinting} // Pass the parent's TBA address
             />
-            {/* The EditNote component is NOT rendered here as it's out of scope */}
+            
+            {/* --- ADD Note Component --- */}
+            <AddNote
+               tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
+               entryName={fullName} // Pass the full name for tx description
+            />
+
+            {/* --- ADD Fact Component --- */}
+            <AddFact
+               tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
+               entryName={fullName} // Pass the full name for tx description
+            />
          </div>
       )}
       {/* Optional: Add a message if owner but parentTba is missing */}
