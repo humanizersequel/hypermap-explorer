@@ -1,10 +1,9 @@
 // hypermap-web-explorer/hypermap-explorer/pages/[...slug].js
 import { useRouter } from 'next/router';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi'; // <-- IMPORT useAccount
 // Import our custom NamespaceInfo component
 import NamespaceInfo from '../components/NamespaceInfo';
 
@@ -58,7 +57,6 @@ export default function EntryPage() {
   const router = useRouter();
   // 'slug' from router.query will be an array of path segments, or undefined initially
   const { slug } = router.query;
-  const { address: connectedAddress, isConnected } = useAccount(); // <-- Get account info
 
   // State for the fetched data, loading status, and errors
   const [entryData, setEntryData] = useState(null);
@@ -126,14 +124,6 @@ export default function EntryPage() {
      // If router is not ready yet, do nothing and wait for it to hydrate
 
   }, [slug, router.isReady]); // Dependency array: re-run effect if slug or router readiness changes
-  
-  // --- Calculate isOwner status ---
-  const isOwner = useMemo(() => {
-      if (!isConnected || !connectedAddress || !entryData || !entryData.owner) {
-          return false;
-      }
-      return entryData.owner.toLowerCase() === connectedAddress.toLowerCase();
-  }, [isConnected, connectedAddress, entryData]);
 
   // Basic loading state while router is not ready or slug is missing
   if (!router.isReady) {
@@ -171,7 +161,10 @@ export default function EntryPage() {
       </header>
 
       <main>
-        {/* Display loading/error for main data fetch */}
+        {/* Pass the validated slug array to the NamespaceInfo component */}
+        <NamespaceInfo slug={slug} />
+
+        {/* Display the original entry details including notes, facts, and children */}
         {loading && (
           <div style={{ marginTop: '30px' }}>
             <p>Loading entry details...</p>
@@ -184,21 +177,7 @@ export default function EntryPage() {
           </div>
         )}
 
-        {/* --- RENDER NamespaceInfo --- */}
-        {/* Render only when data is loaded and no error */}
         {entryData && !loading && !error && (
-          <>
-            <NamespaceInfo
-              owner={entryData.owner}
-              tba={entryData.tba} // Pass TBA address if available in the API response
-              fullName={entryData.fullName}
-              namehash={entryData.namehash}
-              label={entryData.label}
-              isOwner={isOwner} // Pass calculated owner status
-              slugForDisplay={slug} // Pass original slug array for display path
-            />
-            
-            {/* Continue with original entry details including notes, facts, and children */}
           <div style={{ marginTop: '30px' }}>
             {/* Notes and Facts */}
             <RenderNotesOrFacts title="Notes" items={entryData.notes} />
@@ -232,7 +211,6 @@ export default function EntryPage() {
               <p>None</p>
             )}
           </div>
-          </>
         )}
       </main>
 
