@@ -1,4 +1,4 @@
-// hypermap-web-explorer/hypermap-explorer/components/NamespaceInfo.js (New File)
+// hypermap-web-explorer/hypermap-explorer/components/NamespaceInfo.js
 import { useState, useEffect } from 'react';
 import { useAccount, useChainId } from 'wagmi'; // Only need useAccount and useChainId from wagmi here
 import { BASE_CHAIN_ID } from '../lib/constants';
@@ -17,6 +17,9 @@ export default function NamespaceInfo({ slug }) {
   const [apiError, setApiError] = useState(null); // Stores any API error message
   const [isOwner, setIsOwner] = useState(false); // Tracks if connected wallet is the owner
   const [fullName, setFullName] = useState(''); // Stores the reconstructed full name (e.g., "nick.hypr")
+  // --- ADD State for Parent TBA Address ---
+  const [parentTbaForMinting, setParentTbaForMinting] = useState(null);
+  // --- END ADD ---
 
   // Effect Hook: Fetch data from the backend API when the slug changes
   useEffect(() => {
@@ -26,6 +29,9 @@ export default function NamespaceInfo({ slug }) {
       // but now we get the correct fullName directly from the API response
       // Instead, we'll just set a temporary display value until API responds
       setFullName(''); // Will be set from API response after fetch
+      // --- ADD Reset for Parent TBA ---
+      setParentTbaForMinting(null);
+      // --- END ADD ---
 
       // Define the async function to fetch data
       const fetchEntryData = async () => {
@@ -33,6 +39,9 @@ export default function NamespaceInfo({ slug }) {
         setApiError(null); // Clear previous errors
         setEntryData(null); // Reset data for new slug
         setIsOwner(false); // Reset ownership status
+        // --- ADD Reset for Parent TBA on fetch ---
+        setParentTbaForMinting(null);
+        // --- END ADD ---
 
         console.log(`Fetching API: /api/entry/by-name/${slug.join('/')}`);
 
@@ -75,6 +84,18 @@ export default function NamespaceInfo({ slug }) {
           }
           // --- END CORRECTION ---
 
+          // --- ADD Logic to extract and store Parent TBA Address ---
+          // This assumes your API response for the current entry (the parent)
+          // now includes a 'tba' field as per your update.
+          if (fetchedEntry.tba) {
+              setParentTbaForMinting(fetchedEntry.tba);
+              console.log('Set parentTbaForMinting state from API:', fetchedEntry.tba);
+          } else {
+              console.warn("API response missing tba field. Minting will be disabled.");
+              // Keep parentTbaForMinting as null
+          }
+          // --- END ADD ---
+
           // ** Ownership Check (Simplified) **
           // Compare owner from API with connected address directly here
           if (isConnected && connectedAddress && fetchedEntry.owner) {
@@ -91,6 +112,9 @@ export default function NamespaceInfo({ slug }) {
           console.error("API Fetch Error:", error);
           setApiError(error.message); // Store error message
           setIsOwner(false); // Ensure ownership is false on error
+          // --- ADD Reset for Parent TBA on error ---
+          setParentTbaForMinting(null);
+          // --- END ADD ---
         } finally {
           setIsLoadingApi(false); // Clear loading state regardless of outcome
         }
@@ -103,6 +127,9 @@ export default function NamespaceInfo({ slug }) {
         setApiError('Invalid namespace path provided in URL.');
         setFullName('');
         setIsOwner(false);
+        // --- ADD Reset for Parent TBA on invalid slug ---
+        setParentTbaForMinting(null);
+        // --- END ADD ---
     }
     // This effect depends on the 'slug' and connection status/address
   }, [slug, isConnected, connectedAddress]); // Re-run when slug or connection state changes
@@ -154,17 +181,21 @@ export default function NamespaceInfo({ slug }) {
       </div>
 
 
-      {/* Action Components Container - Render Mint ONLY IF owner, connected, and on correct chain */}
-      {isOwner && isConnected && isCorrectChain && (
+      {/* Action Components Container - Render Mint ONLY IF owner, connected, on correct chain, and parent TBA available */}
+      {isOwner && isConnected && isCorrectChain && parentTbaForMinting && (
          <div style={{ borderTop: '1px solid #ccc', paddingTop: '20px' }}>
             <h4>Owner Actions</h4>
             {/* Render the Mint component, passing necessary props */}
             <MintSubEntry
                parentNamespace={fullName} // Pass the full name (e.g., "nick.hypr")
-               // parentNamehash={namehash} // Pass hash if needed by mint logic (currently not needed)
+               parentTbaAddress={parentTbaForMinting} // Pass the parent's TBA address
             />
             {/* The EditNote component is NOT rendered here as it's out of scope */}
          </div>
+      )}
+      {/* Optional: Add a message if owner but parentTba is missing */}
+      {isOwner && isConnected && isCorrectChain && !parentTbaForMinting && !isLoadingApi && (
+          <p style={{ color: 'orange', marginTop: '10px' }}>Parent TBA address not found, minting disabled.</p>
       )}
     </div>
   );
