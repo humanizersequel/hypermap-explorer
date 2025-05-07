@@ -30,7 +30,7 @@ export default function AddFact({ tbaAddress, entryName }) {
     React.useEffect(() => {
         if (isConfirmed && transactionHash) {
             addRecentTransaction({ hash: transactionHash, description: `Added fact ${factKey} to ${entryName}` });
-             // Clear inputs on success? Optional.
+            // Clear inputs on success? Optional.
             // setFactKey('!');
             // setFactValue('');
         }
@@ -58,7 +58,7 @@ export default function AddFact({ tbaAddress, entryName }) {
             openConnectModal?.();
             return;
         }
-         if (!tbaAddress) {
+        if (!tbaAddress) {
             alert("Target TBA address is missing.");
             console.error("AddFact called without tbaAddress.");
             return;
@@ -104,62 +104,66 @@ export default function AddFact({ tbaAddress, entryName }) {
 
 
     return (
-        <div style={{ border: '1px solid #d0d0d0', padding: '15px', borderRadius: '6px', backgroundColor: '#ffffff', marginTop:'15px' }}>
-          <h4>Add Fact (Immutable)</h4>
-          <form onSubmit={handleAddFact}>
-             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="factKey" style={{ display: 'block', marginBottom: '5px' }}>Key:</label>
-              <input
-                id="factKey"
-                type="text"
-                value={factKey}
-                onChange={handleFactKeyChange}
-                placeholder="!key (no dots/spaces)"
-                required
-                style={{width:'100%', padding:'8px', boxSizing:'border-box'}}
-                disabled={isSending || isConfirming}
-              />
-            </div>
-             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="factValue" style={{ display: 'block', marginBottom: '5px' }}>Value:</label>
-              <input
-                id="factValue"
-                type="text"
-                value={factValue}
-                onChange={(e) => setFactValue(e.target.value)}
-                placeholder="Value (required)"
-                required
-                style={{width:'100%', padding:'8px', boxSizing:'border-box'}}
-                disabled={isSending || isConfirming}
-              />
-            </div>
-            <button
-                type="submit"
-                disabled={isDisabled}
-                style={{ opacity: isDisabled ? 0.5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', padding: '10px 15px', backgroundColor: '#0052FF', color: 'white', border: 'none', borderRadius: '4px' }}
-            >
-              {isSending ? 'Sending...' : (isConfirming ? 'Confirming...' : 'Add Fact')}
-            </button>
-             <p style={{ fontSize: '0.8em', marginTop: '10px', color: '#555' }}>Note: Facts are immutable and cannot be changed once set.</p>
-          </form>
+        <div
+            className="border border-gray-300 rounded-md p-4 mt-4"
+        >
+            <h4>Add Fact (Immutable)</h4>
+            <form onSubmit={handleAddFact}>
+                <div className="mb-2">
+                    <label htmlFor="factKey" className="block mb-1">Key:</label>
+                    <input
+                        id="factKey"
+                        type="text"
+                        value={factKey}
+                        onChange={handleFactKeyChange}
+                        placeholder="!key (no dots/spaces)"
+                        required
+                        className="w-full p-2"
+                        disabled={isSending || isConfirming}
+                    />
+                </div>
+                <div className="mb-2">
+                    <label htmlFor="factValue" className="block mb-1">Value:</label>
+                    <input
+                        id="factValue"
+                        type="text"
+                        value={factValue}
+                        onChange={(e) => setFactValue(e.target.value)}
+                        placeholder="Value (required)"
+                        required
+                        className="w-full p-2"
+                        disabled={isSending || isConfirming}
+                    />
+                </div>
+                <button
+                    type="submit"
+                    disabled={isDisabled}
+                    className="opacity-50 cursor-not-allowed p-2 rounded-md bg-blue-500 text-white border-none"
+                >
+                    {isSending ? 'Sending...' : (isConfirming ? 'Confirming...' : 'Add Fact')}
+                </button>
+                <p className="text-sm mt-2 text-gray-700">Note: Facts are immutable and cannot be changed once set.</p>
+            </form>
 
-           {/* Transaction Status Feedback */}
-          <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
-             {transactionHash && !isConfirmed && !receiptError && !writeError && (
-                 <p style={{ color: '#555', wordBreak: 'break-all' }}>Transaction submitted: {transactionHash}</p>
-             )}
-             {isConfirming && (
-                 <p style={{ color: 'blue' }}>Waiting for blockchain confirmation...</p>
-             )}
-             {isConfirmed && (
-                 <p style={{ color: 'green', fontWeight: 'bold', wordBreak: 'break-all' }}>✅ Fact added! Tx: {transactionHash} (Refresh page to see changes)</p>
-             )}
-             {(writeError || receiptError) && (
-                 <p style={{ color: 'red', fontWeight: 'bold' }}>
-                     ❌ Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
-                 </p>
-             )}
-          </div>
+            {/* Transaction Status Feedback */}
+            <div className="mt-2 text-sm">
+                {transactionHash && !isConfirmed && !receiptError && !writeError && (
+                    <p
+                        className="text-gray-700 break-all"
+                    >Transaction submitted: {transactionHash}</p>
+                )}
+                {isConfirming && (
+                    <p className="text-blue-500">Waiting for blockchain confirmation...</p>
+                )}
+                {isConfirmed && (
+                    <p className="text-green-500 font-bold break-all">✅ Fact added! Tx: {transactionHash} (Refresh page to see changes)</p>
+                )}
+                {(writeError || receiptError) && (
+                    <p className="text-red-500 font-bold">
+                        ❌ Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
+                    </p>
+                )}
+            </div>
         </div>
-      );
+    );
 }

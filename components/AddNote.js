@@ -98,60 +98,60 @@ export default function AddNote({ tbaAddress, entryName }) {
     const isDisabled = !tbaAddress || isSending || isConfirming || !isConnected || currentChainId !== BASE_CHAIN_ID || !noteKey || noteKey.length <= 1 || noteKey.includes('.') || noteKey.includes(' ');
 
     return (
-        <div style={{ border: '1px solid #d0d0d0', padding: '15px', borderRadius: '6px', backgroundColor: '#ffffff', marginTop:'15px' }}>
-          <h4>Add/Update Note</h4>
-          <form onSubmit={handleAddNote}>
-            <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="noteKey" style={{ display: 'block', marginBottom: '5px' }}>Key:</label>
-              <input
-                id="noteKey"
-                type="text"
-                value={noteKey}
-                onChange={handleNoteKeyChange}
-                placeholder="~key (no dots/spaces)"
-                required
-                style={{width:'100%', padding:'8px', boxSizing:'border-box'}}
-                disabled={isSending || isConfirming}
-              />
-            </div>
-            <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="noteValue" style={{ display: 'block', marginBottom: '5px' }}>Value:</label>
-              <input
-                id="noteValue"
-                type="text"
-                value={noteValue}
-                onChange={(e) => setNoteValue(e.target.value)}
-                placeholder="Value"
-                style={{width:'100%', padding:'8px', boxSizing:'border-box'}}
-                disabled={isSending || isConfirming}
-              />
-            </div>
-            <button
-                type="submit"
-                disabled={isDisabled}
-                style={{ opacity: isDisabled ? 0.5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', padding: '10px 15px', backgroundColor: '#0052FF', color: 'white', border: 'none', borderRadius: '4px' }}
-            >
-              {isSending ? 'Sending...' : (isConfirming ? 'Confirming...' : 'Add/Update Note')}
-            </button>
-          </form>
+        <div className="border border-gray-300 rounded-md p-4 mt-4">
+            <h4>Add/Update Note</h4>
+            <form onSubmit={handleAddNote}>
+                <div className="mb-2">
+                    <label htmlFor="noteKey" className="block mb-1">Key:</label>
+                    <input
+                        id="noteKey"
+                        type="text"
+                        value={noteKey}
+                        onChange={handleNoteKeyChange}
+                        placeholder="~key (no dots/spaces)"
+                        required
+                        className="w-full p-2"
+                        disabled={isSending || isConfirming}
+                    />
+                </div>
+                <div className="mb-2">
+                    <label htmlFor="noteValue" className="block mb-1">Value:</label>
+                    <input
+                        id="noteValue"
+                        type="text"
+                        value={noteValue}
+                        onChange={(e) => setNoteValue(e.target.value)}
+                        placeholder="Value"
+                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        disabled={isSending || isConfirming}
+                    />
+                </div>
+                <button
+                    type="submit"
+                    disabled={isDisabled}
+                    style={{ opacity: isDisabled ? 0.5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer', padding: '10px 15px', backgroundColor: '#0052FF', color: 'white', border: 'none', borderRadius: '4px' }}
+                >
+                    {isSending ? 'Sending...' : (isConfirming ? 'Confirming...' : 'Add/Update Note')}
+                </button>
+            </form>
 
-          {/* Transaction Status Feedback */}
-          <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
-             {transactionHash && !isConfirmed && !receiptError && !writeError && (
-                 <p style={{ color: '#555', wordBreak: 'break-all' }}>Transaction submitted: {transactionHash}</p>
-             )}
-             {isConfirming && (
-                 <p style={{ color: 'blue' }}>Waiting for blockchain confirmation...</p>
-             )}
-             {isConfirmed && (
-                 <p style={{ color: 'green', fontWeight: 'bold', wordBreak: 'break-all' }}>✅ Note added/updated! Tx: {transactionHash} (Refresh page to see changes)</p>
-             )}
-             {(writeError || receiptError) && (
-                 <p style={{ color: 'red', fontWeight: 'bold' }}>
-                     ❌ Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
-                 </p>
-             )}
-          </div>
+            {/* Transaction Status Feedback */}
+            <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                {transactionHash && !isConfirmed && !receiptError && !writeError && (
+                    <p className="text-gray-700 break-all">Transaction submitted: {transactionHash}</p>
+                )}
+                {isConfirming && (
+                    <p className="text-blue-500">Waiting for blockchain confirmation...</p>
+                )}
+                {isConfirmed && (
+                    <p className="text-green-500 font-bold break-all">✅ Note added/updated! Tx: {transactionHash} (Refresh page to see changes)</p>
+                )}
+                {(writeError || receiptError) && (
+                    <p className="text-red-500 font-bold">
+                        ❌ Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
+                    </p>
+                )}
+            </div>
         </div>
-      );
+    );
 }

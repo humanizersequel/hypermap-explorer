@@ -4,51 +4,56 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import Copier from '../components/Copier';
 // Import our custom NamespaceInfo component
 import NamespaceInfo from '../components/NamespaceInfo';
 
 // Helper component to render notes/facts section
 function RenderNotesOrFacts({ title, items }) {
-    if (!items || Object.keys(items).length === 0) {
-        return (
-            <>
-                <h2>{title}</h2>
-                <p>None</p>
-            </>
-        );
-    }
+  if (!items || Object.keys(items).length === 0) {
     return (
-        <>
-            <h2>{title}</h2>
-            <ul style={{ listStyle: 'none', paddingLeft: '0' }}>
-                {Object.entries(items).map(([label, history]) => (
-                    <li key={label} style={{ marginBottom: '15px', borderLeft: '3px solid #eee', paddingLeft: '15px' }}>
-                        <strong>{label}:</strong>
-                        {/* Display only the most recent entry (index 0 due to DB sorting) */}
-                        {history.length > 0 && (
-                            <div style={{ marginLeft: '10px', fontSize: '0.9em', color: '#333', marginTop: '5px' }}>
-                                {/* Display interpreted data if available, otherwise show raw */}
-                                <span>Data: </span>
-                                <code style={{ background: '#eee', padding: '2px 4px', borderRadius: '3px', display: 'inline-block', maxWidth:'100%', overflowWrap:'break-word' }}>
-                                    {history[0].data !== null ? String(history[0].data) : `(Raw: ${history[0].rawData})`}
-                                </code>
-                                <br/>
-                                {/* Optionally always show raw data too */}
-                                {history[0].data !== null && (
-                                     <span style={{fontSize: '0.8em', color: '#666'}}>Raw: <code style={{ background: '#eee', padding: '1px 3px', borderRadius: '3px', wordBreak: 'break-all' }}>{history[0].rawData}</code></span>
-                                )}
-                                <br/>
-                                <small style={{ color: '#777' }}>
-                                    (Block: {history[0].blockNumber} | Tx: <code style={{fontSize:'0.9em'}}>{history[0].txHash?.substring(0,10)}...</code> | Log Idx: {history[0].logIndex})
-                                </small>
-                                {/* Consider adding a button here later to show full history if needed */}
-                            </div>
-                        )}
-                    </li>
-                ))}
-            </ul>
-        </>
+      <>
+        <h2>{title}</h2>
+        <p>None</p>
+      </>
     );
+  }
+  return (
+    <>
+      <h2>{title}</h2>
+      <ul className="list-none p-0">
+        {Object.entries(items).map(([label, history]) => (
+          <li key={label} className="mb-4 border-l-4 border-gray-200 pl-4">
+            <strong>{label}:</strong>
+            {/* Display only the most recent entry (index 0 due to DB sorting) */}
+            {history.length > 0 && (
+              <div className="ml-2 text-sm mt-1">
+                {/* Display interpreted data if available, otherwise show raw */}
+                <span>Data: </span>
+                <code className="bg-black/10 dark:bg-white/10 p-2 rounded-md break-all">
+                  {history[0].data !== null ? String(history[0].data) : `(Raw: ${history[0].rawData})`}
+                </code>
+                <Copier text={history[0].data} />
+                <br />
+                {/* Optionally always show raw data too */}
+                {history[0].data !== null && <>
+                  <span className="text-sm">Raw: <code
+                    className="p-1 rounded-md break-all"
+                  >{history[0].rawData}</code></span>
+                  <Copier text={history[0].rawData} />
+                </>}
+                <br />
+                <small>
+                  (Block: {history[0].blockNumber} | Tx: <code className="font-mono">{history[0].txHash?.substring(0, 10)}...</code> | Log Idx: {history[0].logIndex}) <Copier text={history[0].txHash} />
+                </small>
+                {/* Consider adding a button here later to show full history if needed */}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
 }
 
 
@@ -107,8 +112,8 @@ export default function EntryPage() {
             // This indicates an unexpected response format from the API
             throw new Error("Received unexpected data format from API.");
           }
-           // Data loaded successfully, stop loading indicator
-           setLoading(false);
+          // Data loaded successfully, stop loading indicator
+          setLoading(false);
         })
         .catch((err) => {
           // Handle any errors during fetch or processing
@@ -117,11 +122,11 @@ export default function EntryPage() {
           setLoading(false); // Stop loading indicator
         });
     } else if (router.isReady && !slug) {
-        // Handle cases where router is ready but slug is missing (e.g., maybe root path, handle differently if needed)
-        setLoading(false);
-        setError("Invalid or missing path.");
+      // Handle cases where router is ready but slug is missing (e.g., maybe root path, handle differently if needed)
+      setLoading(false);
+      setError("Invalid or missing path.");
     }
-     // If router is not ready yet, do nothing and wait for it to hydrate
+    // If router is not ready yet, do nothing and wait for it to hydrate
 
   }, [slug, router.isReady]); // Dependency array: re-run effect if slug or router readiness changes
 
@@ -132,32 +137,32 @@ export default function EntryPage() {
 
   // Handle case where slug might be ready but invalid (e.g., non-array - though unlikely with [...slug].js)
   if (!Array.isArray(slug) || slug.length === 0) {
-       // You could redirect or show a specific message for root/invalid paths if needed
-       // For now, just indicate it's not a valid entry path based on slug.
-       return (
-           <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6', maxWidth: '960px', margin: '0 auto' }}>
-               <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid #ddd' }}>
-                   <Link href="/">Back to Home</Link>
-                   <ConnectButton />
-               </header>
-               <p>Invalid Hypermap path.</p>
-           </div>
-       );
-   }
+    // You could redirect or show a specific message for root/invalid paths if needed
+    // For now, just indicate it's not a valid entry path based on slug.
+    return (
+      <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6', maxWidth: '960px', margin: '0 auto' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid #ddd' }}>
+          <Link href="/">Back to Home</Link>
+          <ConnectButton />
+        </header>
+        <p>Invalid Hypermap path.</p>
+      </div>
+    );
+  }
 
   const path = slug.join('/'); // Reconstruct the display path e.g., "nick/hypr"
 
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '20px', lineHeight: '1.6', maxWidth: '960px', margin: '0 auto' }}>
+    <div className="font-sans p-4 leading-6 max-w-4xl mx-auto">
       <Head>
         <title>Hypermap: /{path}</title>
         <meta name="description" content={`Exploring the Hypermap namespace entry /${path} on Base`} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '15px', borderBottom: '1px solid #ddd' }}>
-         <Link href="/">← Back to Home</Link>
-         <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon"/>
+      <header className="flex justify-between items-center mb-4 pb-2 border-b">
+        <Link href="/">← Back to Home</Link>
+        <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
       </header>
 
       <main>
@@ -166,19 +171,19 @@ export default function EntryPage() {
 
         {/* Display the original entry details including notes, facts, and children */}
         {loading && (
-          <div style={{ marginTop: '30px' }}>
+          <div className="mt-4">
             <p>Loading entry details...</p>
           </div>
         )}
 
         {error && (
-          <div style={{ marginTop: '30px', color: 'red' }}>
+          <div className="mt-4 text-red-500">
             <p>Error loading entry details: {error}</p>
           </div>
         )}
 
         {entryData && !loading && !error && (
-          <div style={{ marginTop: '30px' }}>
+          <div className="mt-4">
             {/* Notes and Facts */}
             <RenderNotesOrFacts title="Notes" items={entryData.notes} />
             <RenderNotesOrFacts title="Facts" items={entryData.facts} />
@@ -186,25 +191,25 @@ export default function EntryPage() {
             {/* Display Children */}
             <h2>Children</h2>
             {entryData.children && entryData.children.length > 0 ? (
-              <ul style={{ listStyle: 'none', paddingLeft: '10px' }}>
+              <ul className="list-none p-0">
                 {entryData.children.map(child => {
-                    // Construct the URL path from the child's full name
-                    const childUrlPath = child.fullName ? child.fullName.split('.').reverse().join('/') : null;
-                    return (
-                        <li key={child.namehash} style={{ margin: '5px 0' }}>
-                            {childUrlPath ? (
-                                <Link href={`/${childUrlPath}`}>
-                                    {/* Display child label, fallback to truncated hash */}
-                                    {child.label || child.namehash.substring(0, 10)}
-                                </Link>
-                            ) : (
-                                // If child full name missing (shouldn't happen often with filtering), just show label/hash
-                                <span>{child.label || child.namehash.substring(0, 10)}</span>
-                            )}
-                            {' '} {/* Space */}
-                            (<code style={{fontSize:'0.8em', color:'#555'}}>{child.namehash}</code>)
-                        </li>
-                    );
+                  // Construct the URL path from the child's full name
+                  const childUrlPath = child.fullName ? child.fullName.split('.').reverse().join('/') : null;
+                  return (
+                    <li key={child.namehash} className="mx-2">
+                      {childUrlPath ? (
+                        <Link href={`/${childUrlPath}`}>
+                          {/* Display child label, fallback to truncated hash */}
+                          {child.label || child.namehash.substring(0, 10)}
+                        </Link>
+                      ) : (
+                        // If child full name missing (shouldn't happen often with filtering), just show label/hash
+                        <span>{child.label || child.namehash.substring(0, 10)}</span>
+                      )}
+                      {' '} {/* Space */}
+                      (<code >{child.namehash}</code>)
+                    </li>
+                  );
                 })}
               </ul>
             ) : (
@@ -214,9 +219,9 @@ export default function EntryPage() {
         )}
       </main>
 
-       <footer style={{marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '0.9em', color: '#777', textAlign: 'center'}}>
-         Hypermap Explorer on Base
-       </footer>
+      <footer style={{ marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #ddd', fontSize: '0.9em', color: '#777', textAlign: 'center' }}>
+        Hypermap Explorer on Base
+      </footer>
     </div>
   );
 }

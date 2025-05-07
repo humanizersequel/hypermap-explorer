@@ -68,7 +68,7 @@ export default function NamespaceInfo({ slug }) {
           // The API returns data keyed by the entry's namehash
           const namehash = Object.keys(data)[0];
           if (!namehash || !data[namehash]) {
-              throw new Error("Invalid API response format received.");
+            throw new Error("Invalid API response format received.");
           }
           const fetchedEntry = data[namehash];
           console.log("API Data Received:", fetchedEntry);
@@ -90,23 +90,23 @@ export default function NamespaceInfo({ slug }) {
           // This assumes your API response for the current entry (the parent)
           // now includes a 'tba' field as per your update.
           if (fetchedEntry.tba) {
-              setParentTbaForMinting(fetchedEntry.tba);
-              console.log('Set parentTbaForMinting state from API:', fetchedEntry.tba);
+            setParentTbaForMinting(fetchedEntry.tba);
+            console.log('Set parentTbaForMinting state from API:', fetchedEntry.tba);
           } else {
-              console.warn("API response missing tba field. Minting will be disabled.");
-              // Keep parentTbaForMinting as null
+            console.warn("API response missing tba field. Minting will be disabled.");
+            // Keep parentTbaForMinting as null
           }
           // --- END ADD ---
 
           // ** Ownership Check (Simplified) **
           // Compare owner from API with connected address directly here
           if (isConnected && connectedAddress && fetchedEntry.owner) {
-              const ownerFromApi = fetchedEntry.owner;
-              const isMatch = ownerFromApi?.toLowerCase() === connectedAddress?.toLowerCase();
-              setIsOwner(isMatch);
-              console.log(`Ownership check: API Owner=${ownerFromApi}, Connected=${connectedAddress}, Match=${isMatch}`);
+            const ownerFromApi = fetchedEntry.owner;
+            const isMatch = ownerFromApi?.toLowerCase() === connectedAddress?.toLowerCase();
+            setIsOwner(isMatch);
+            console.log(`Ownership check: API Owner=${ownerFromApi}, Connected=${connectedAddress}, Match=${isMatch}`);
           } else {
-              setIsOwner(false); // Not connected or missing data
+            setIsOwner(false); // Not connected or missing data
           }
           // --- End Processing ---
 
@@ -124,14 +124,14 @@ export default function NamespaceInfo({ slug }) {
 
       fetchEntryData(); // Execute the fetch function
     } else {
-        // Handle cases with invalid slug input
-        setEntryData(null);
-        setApiError('Invalid namespace path provided in URL.');
-        setFullName('');
-        setIsOwner(false);
-        // --- ADD Reset for Parent TBA on invalid slug ---
-        setParentTbaForMinting(null);
-        // --- END ADD ---
+      // Handle cases with invalid slug input
+      setEntryData(null);
+      setApiError('Invalid namespace path provided in URL.');
+      setFullName('');
+      setIsOwner(false);
+      // --- ADD Reset for Parent TBA on invalid slug ---
+      setParentTbaForMinting(null);
+      // --- END ADD ---
     }
     // This effect depends on the 'slug' and connection status/address
   }, [slug, isConnected, connectedAddress]); // Re-run when slug or connection state changes
@@ -139,11 +139,11 @@ export default function NamespaceInfo({ slug }) {
 
   // --- Render Logic ---
   // Handle loading and error states first
-  if (!slug || slug.length === 0) return <div style={{padding: '20px', color: '#555'}}>Enter a valid Hypermap path in the URL (e.g., /nick/hypr).</div>;
-  if (isLoadingApi) return <div style={{padding: '20px'}}>Loading entry data for &apos;{fullName}&apos;...</div>;
-  if (apiError) return <div style={{padding: '20px', color: 'red'}}>Error loading data: {apiError}</div>;
+  if (!slug || slug.length === 0) return <div style={{ padding: '20px', color: '#555' }}>Enter a valid Hypermap path in the URL (e.g., /nick/hypr).</div>;
+  if (isLoadingApi) return <div style={{ padding: '20px' }}>Loading entry data for &apos;{fullName}&apos;...</div>;
+  if (apiError) return <div style={{ padding: '20px', color: 'red' }}>Error loading data: {apiError}</div>;
   // Handle case where API call finished but found no data (404 was likely handled by API, but check state too)
-  if (!entryData) return <div style={{padding: '20px'}}>Namespace &apos;{fullName}&apos; not found.</div>;
+  if (!entryData) return <div style={{ padding: '20px' }}>Namespace &apos;{fullName}&apos; not found.</div>;
 
   // If data is loaded, extract details for display
   const { namehash, owner, label } = entryData;
@@ -153,62 +153,68 @@ export default function NamespaceInfo({ slug }) {
 
   return (
     // Use a more descriptive wrapper or styling as needed
-    <div style={{ border: '1px solid #e0e0e0', padding: '20px', marginTop: '20px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+    <div
+      className="border border-gray-300 rounded-md p-4 mt-4"
+    >
       <h3>Namespace: /{slug.join('/')}</h3>
-      <div style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px dashed #ccc' }}>
-         <p><strong>Full Name:</strong> {fullName}</p>
-         <p><strong>Label:</strong> {label}</p>
-         <p><strong>Namehash:</strong> <code style={{fontSize: '0.9em', wordBreak: 'break-all'}}>{namehash}</code></p>
-         <p><strong>Owner:</strong> <code style={{fontSize: '0.9em', wordBreak: 'break-all'}}>{owner}</code></p>
-         {/* Removed TBA Address display as it's out of scope */}
+      <div
+        className="mb-4 pb-4 border-b border-dashed border-gray-300"
+      >
+        <p><strong>Full Name:</strong> {fullName}</p>
+        <p><strong>Label:</strong> {label}</p>
+        <p><strong>Namehash:</strong> <code className="text-sm break-all">{namehash}</code></p>
+        <p><strong>Owner:</strong> <code className="text-sm break-all">{owner}</code></p>
+        {/* Removed TBA Address display as it's out of scope */}
       </div>
 
       {/* Ownership Status Display - Clearer messages */}
-      <div style={{ marginBottom: '20px' }}>
-          {isConnected ? (
-              isCorrectChain ? (
-                  isOwner ? (
-                      <p style={{ color: 'green', fontWeight: 'bold', border: '1px solid green', padding: '8px', borderRadius: '4px', backgroundColor: '#e8f5e9' }}>✅ You are the owner of this namespace entry.</p>
-                  ) : (
-                      <p style={{ color: 'darkorange', fontWeight: 'bold', border: '1px solid orange', padding: '8px', borderRadius: '4px', backgroundColor: '#fff3e0' }}>⚠️ You are connected, but do not own this entry.</p>
-                  )
-              ) : (
-                  // Connected but on wrong chain
-                  <p style={{ color: 'red', fontWeight: 'bold', border: '1px solid red', padding: '8px', borderRadius: '4px', backgroundColor: '#ffebee' }}>❌ Please switch your wallet to the Base network to interact.</p>
-              )
+      <div>
+        {isConnected ? (
+          isCorrectChain ? (
+            isOwner ? (
+              <p
+                className="text-green-500 font-bold border border-green-500 rounded-md p-2 bg-green-500/10"
+              >✅ You are the owner of this namespace entry.</p>
+            ) : (
+              <p className="text-orange-500 font-bold border border-orange-500 rounded-md p-2 bg-orange-500/10">⚠️ You are connected, but do not own this entry.</p>
+            )
           ) : (
-              // Not connected
-              <p style={{ color: '#555', border: '1px solid #ccc', padding: '8px', borderRadius: '4px', backgroundColor: '#eee' }}>🔌 Connect your wallet (top right) to check ownership and enable owner actions.</p>
-          )}
+            // Connected but on wrong chain
+            <p className="text-red-500 font-bold border border-red-500 rounded-md p-2 bg-red-500/10">❌ Please switch your wallet to the Base network to interact.</p>
+          )
+        ) : (
+          // Not connected
+          <p className="text-gray-500 border border-gray-500 rounded-md p-4 bg-gray-500/10">🔌 Connect your wallet (top right) to check ownership and enable owner actions.</p>
+        )}
       </div>
 
 
       {/* Action Components Container - Render Mint ONLY IF owner, connected, on correct chain, and parent TBA available */}
       {isOwner && isConnected && isCorrectChain && parentTbaForMinting && (
-         <div style={{ borderTop: '1px solid #ccc', paddingTop: '20px' }}>
-            <h4>Owner Actions</h4>
-            {/* Render the Mint component, passing necessary props */}
-            <MintSubEntry
-               parentNamespace={fullName} // Pass the full name (e.g., "nick.hypr")
-               parentTbaAddress={parentTbaForMinting} // Pass the parent's TBA address
-            />
-            
-            {/* --- ADD Note Component --- */}
-            <AddNote
-               tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
-               entryName={fullName} // Pass the full name for tx description
-            />
+        <div className="border-t border-gray-300 pt-4">
+          <h4>Owner Actions</h4>
+          {/* Render the Mint component, passing necessary props */}
+          <MintSubEntry
+            parentNamespace={fullName} // Pass the full name (e.g., "nick.hypr")
+            parentTbaAddress={parentTbaForMinting} // Pass the parent's TBA address
+          />
 
-            {/* --- ADD Fact Component --- */}
-            <AddFact
-               tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
-               entryName={fullName} // Pass the full name for tx description
-            />
-         </div>
+          {/* --- ADD Note Component --- */}
+          <AddNote
+            tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
+            entryName={fullName} // Pass the full name for tx description
+          />
+
+          {/* --- ADD Fact Component --- */}
+          <AddFact
+            tbaAddress={parentTbaForMinting} // Pass the entry's TBA address
+            entryName={fullName} // Pass the full name for tx description
+          />
+        </div>
       )}
       {/* Optional: Add a message if owner but parentTba is missing */}
       {isOwner && isConnected && isCorrectChain && !parentTbaForMinting && !isLoadingApi && (
-          <p style={{ color: 'orange', marginTop: '10px' }}>Parent TBA address not found, minting disabled.</p>
+        <p className="text-orange-500 mt-2">Parent TBA address not found, minting disabled.</p>
       )}
     </div>
   );

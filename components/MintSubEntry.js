@@ -41,9 +41,9 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
     // --- Prerequisite Checks ---
     // Ensure the parent TBA address was successfully passed from NamespaceInfo
     if (!parentTbaAddress) {
-        alert('Parent TBA address is missing. Cannot initiate minting process.');
-        console.error("handleMint called without parentTbaAddress in MintSubEntry");
-        return; // Stop execution if parent TBA is missing
+      alert('Parent TBA address is missing. Cannot initiate minting process.');
+      console.error("handleMint called without parentTbaAddress in MintSubEntry");
+      return; // Stop execution if parent TBA is missing
     }
     // Ensure user is connected, has an address, and is on the correct chain (Base)
     if (!isConnected || !connectedAddress || currentChainId !== BASE_CHAIN_ID) {
@@ -80,10 +80,10 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
 
     // STEP 2: Prepare the arguments array for the Parent TBA's 'execute' function call.
     const executeArgs = [
-       HYPERMAP_ADDRESS,      // target (address): The address of the contract the TBA should call (main Hypermap contract).
-       0n,                    // value (uint256): Amount of ETH to send with the call (0 in this case). Use BigInt notation (0n).
-       encodedMintCallData,   // data (bytes): The encoded 'mint' call prepared in Step 1. This is the action the TBA will perform.
-       0                      // operation (uint8): Type of call. 0 typically means standard CALL.
+      HYPERMAP_ADDRESS,      // target (address): The address of the contract the TBA should call (main Hypermap contract).
+      0n,                    // value (uint256): Amount of ETH to send with the call (0 in this case). Use BigInt notation (0n).
+      encodedMintCallData,   // data (bytes): The encoded 'mint' call prepared in Step 1. This is the action the TBA will perform.
+      0                      // operation (uint8): Type of call. 0 typically means standard CALL.
     ];
     console.log("STEP 2: Prepared Arguments for Parent TBA Execute:", executeArgs);
 
@@ -101,9 +101,9 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
         // value: 0n // Explicitly set value to 0 if needed, though often default
       });
     } catch (error) {
-        // Catch potential errors during the writeContract call initiation itself
-        console.error("Error initiating writeContract call:", error);
-        alert(`Failed to initiate transaction: ${error.message}`);
+      // Catch potential errors during the writeContract call initiation itself
+      console.error("Error initiating writeContract call:", error);
+      alert(`Failed to initiate transaction: ${error.message}`);
     }
     // Note: Errors during transaction *sending* or *mining* will be caught by the `writeError` state variable from `useWriteContract`.
   };
@@ -112,29 +112,29 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
   // Hook to watch the transaction status using the hash returned by writeContract
   const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } =
     useWaitForTransactionReceipt({
-       hash: transactionHash, // The hash from the writeContract result
-       chainId: BASE_CHAIN_ID, // Specify chain for monitoring
-       // confirmations: 1, // Optional: Wait for 1 block confirmation
+      hash: transactionHash, // The hash from the writeContract result
+      chainId: BASE_CHAIN_ID, // Specify chain for monitoring
+      // confirmations: 1, // Optional: Wait for 1 block confirmation
     });
   // --- End Monitoring ---
 
 
   // --- Render Component UI ---
   return (
-    <div style={{ border: '1px solid #d0d0d0', padding: '15px', borderRadius: '6px', backgroundColor: '#ffffff' }}>
+    <div className="border border-gray-300 rounded-md p-4 mt-4">
       <h4>Mint New Sub-entry</h4>
-      <p style={{ fontSize: '0.95em', color: '#333' }}>
+      <p className="text-sm text-gray-700">
         Create a new entry under <strong>{parentNamespace}</strong>.
         {/* Display connected address concisely */}
         You ({connectedAddress ? `${connectedAddress.substring(0, 6)}...${connectedAddress.substring(connectedAddress.length - 4)}` : 'Disconnected'}) will be the owner.
       </p>
-      <div style={{ display: 'flex', alignItems: 'stretch', gap: '10px', marginTop: '10px' }}>
+      <div className="flex items-stretch gap-2 mt-2">
         <input
           type="text"
           value={subLabel}
           onChange={(e) => setSubLabel(e.target.value)}
           placeholder="Enter new label (no dots/spaces)"
-          style={{ padding: '10px', flexGrow: 1, border: '1px solid #ccc', borderRadius: '4px' }}
+          className="p-2 flex-grow border border-gray-300 rounded-md"
           // Disable input while sending or confirming transaction
           disabled={isSending || isConfirming}
         />
@@ -142,16 +142,7 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
           onClick={handleMint}
           // Robust disable logic: check label validity, parent TBA presence, connection status, chain, and transaction status
           disabled={!subLabel.trim() || subLabel.includes('.') || subLabel.includes(' ') || !parentTbaAddress || isSending || isConfirming || !isConnected || currentChainId !== BASE_CHAIN_ID}
-          style={{
-              padding: '10px 18px',
-              border: 'none',
-              borderRadius: '4px',
-              backgroundColor: '#0052FF',
-              color: 'white',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              opacity: (!subLabel.trim() || subLabel.includes('.') || subLabel.includes(' ') || !parentTbaAddress || isSending || isConfirming || !isConnected || currentChainId !== BASE_CHAIN_ID) ? 0.5 : 1 // Visual cue for disabled
-          }}
+          className="p-2 border-none rounded-md bg-blue-500 text-white cursor-pointer whitespace-nowrap opacity-50"
         >
           {/* Dynamic button text based on state */}
           {isSending ? 'Sending Tx...' : (isConfirming ? 'Minting (Confirming...)' : 'Mint Sub-Entry')}
@@ -159,25 +150,25 @@ export default function MintSubEntry({ parentNamespace, parentTbaAddress }) {
       </div>
 
       {/* Transaction Status Feedback Area */}
-      <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
-          {/* Show hash immediately if sending starts successfully */}
-          {transactionHash && !isConfirmed && !receiptError && !writeError && (
-             <p style={{ color: '#555', wordBreak: 'break-all' }}>Transaction submitted: {transactionHash}</p>
-          )}
-          {isConfirming && (
-             <p style={{ color: 'blue' }}>Waiting for blockchain confirmation...</p>
-          )}
-          {isConfirmed && (
-             // Suggest page refresh to see update, as frontend state might not auto-update perfectly
-             <p style={{ color: 'green', fontWeight: 'bold', wordBreak: 'break-all' }}>✅ Mint successful! Tx: {transactionHash} (You may need to refresh the page after a moment to see the new entry)</p>
-          )}
-          {/* Display errors: prioritize writeError (sending phase) then receiptError (confirmation phase) */}
-          {(writeError || receiptError) && (
-             <p style={{ color: 'red', fontWeight: 'bold' }}>
-                {/* Use optional chaining and nullish coalescing for safer error message access */}
-                ❌ Minting Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
-             </p>
-          )}
+      <div className="mt-2 text-sm">
+        {/* Show hash immediately if sending starts successfully */}
+        {transactionHash && !isConfirmed && !receiptError && !writeError && (
+          <p className="text-gray-700 break-all">Transaction submitted: {transactionHash}</p>
+        )}
+        {isConfirming && (
+          <p className="text-blue-500">Waiting for blockchain confirmation...</p>
+        )}
+        {isConfirmed && (
+          // Suggest page refresh to see update, as frontend state might not auto-update perfectly
+          <p className="text-green-500 font-bold break-all">✅ Mint successful! Tx: {transactionHash} (You may need to refresh the page after a moment to see the new entry)</p>
+        )}
+        {/* Display errors: prioritize writeError (sending phase) then receiptError (confirmation phase) */}
+        {(writeError || receiptError) && (
+          <p className="text-red-500 font-bold">
+            {/* Use optional chaining and nullish coalescing for safer error message access */}
+            ❌ Minting Error: {(writeError?.shortMessage ?? receiptError?.shortMessage ?? writeError?.message ?? receiptError?.message ?? 'An unknown error occurred.')}
+          </p>
+        )}
       </div>
       {/* --- End Feedback --- */}
     </div>

@@ -1,12 +1,37 @@
+@import 'tailwindcss';
+
 :root {
+  --chaney: 'chaneyextended', sans-serif;
+  --clash: 'Clash Display', sans-serif;
+
+  --font-sans: var(--clash);
+  --font-display: var(--chaney);
+
   --background: #ffffff;
+  --background-tr: #fffa;
+  --background-xtr: #fff1;
   --foreground: #171717;
+  --foreground-tr: #171717aa;
+  --foreground-xtr: #17171711;
+
+  --neon: #dcff71;
+  --iris: #004fff;
+  --stone: #353534;
+  --black: #111111;
+  --white: #f6f6f6;
+
+  --link: var(--iris);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
+    --background-tr: #0a0a0aaa;
+    --background-xtr: #0a0a0a11;
     --foreground: #ededed;
+    --foreground-tr: #edededaa;
+    --foreground-xtr: #ededed11;
+    --link: var(--neon);
   }
 }
 
@@ -14,6 +39,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  font-family: 'Clash Display', sans-serif;
 }
 
 body {
@@ -26,13 +52,107 @@ body {
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
-  color: inherit;
   text-decoration: none;
+  color: var(--link);
+  font-weight: 400;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+button,
+button[type='submit'],
+.button {
+  all: unset;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  place-items: center;
+  place-content: center;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all 0.1s ease-in-out;
+  border-radius: 0.5rem;
+
+  background-color: var(--foreground);
+  border-color: transparent;
+  color: var(--background);
+
+  &:hover {
+    background-color: var(--foreground-xtr);
+    color: var(--foreground);
+    border-color: var(--foreground);
+  }
+
+  &[disabled],
+  &:disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+
+  &.clear {
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: bold;
+
+    &:hover {
+      background-color: var(--neon);
+      color: var(--background);
+    }
+  }
+
+  &.alt {
+    background-color: transparent;
+    border-color: var(--neon);
+    color: var(--neon);
+
+    &:hover {
+      background-color: var(--neon);
+      color: var(--background);
+    }
+  }
+
+  &.thin {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    font-weight: normal;
+  }
+
+  &.icon {
+    display: flex;
+    align-items: center;
+    place-content: center;
+    background-color: transparent;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--foreground);
+    transition: all 0.1s ease-in-out;
+  }
+
+  &.icon.alt {
+    border-color: var(--foreground);
+
+    &:hover {
+      border-color: var(--background);
+    }
+  }
+
+}
+
+code {
+  font-weight: normal;
+  background-color: var(--foreground-xtr);
 }
 
 @media (prefers-color-scheme: dark) {
