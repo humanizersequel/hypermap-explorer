@@ -111,7 +111,7 @@ export default async function handler(req, res) {
     // --- 7. Send Success Response ---
     console.log(`Successfully retrieved data for fullName: ${fullName} (namehash: ${entryHash})`);
     // Set cache headers - example: cache for 60 seconds on CDN, 5 minutes in browser
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120, max-age=300');
+    // res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120, max-age=300');
     res.status(200).json(responseData);
 
   } catch (dbError) {
