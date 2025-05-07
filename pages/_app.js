@@ -8,6 +8,16 @@ import { base } from 'wagmi/chains'; // Import the Base chain configuration
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { http } from 'viem'; // Import http transport for custom RPC
 
+import localFont from 'next/font/local';
+
+const clash = localFont({
+  src: './../public/ClashDisplay-Variable.woff2',
+});
+
+const chaney = localFont({
+  src: './../public/chaneyextended.woff2',
+});
+
 // --- Environment Variable Retrieval ---
 // Fetch keys from process.env - NEXT_PUBLIC_ prefix is crucial here!
 const infuraApiKey = process.env.NEXT_PUBLIC_INFURA_API_KEY;
@@ -15,15 +25,15 @@ const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
 // --- Basic Validation (Optional but good practice) ---
 if (!infuraApiKey) {
-    console.warn("Startup Warning: NEXT_PUBLIC_INFURA_API_KEY environment variable is missing. Falling back to public RPC (not recommended for production).");
+  console.warn("Startup Warning: NEXT_PUBLIC_INFURA_API_KEY environment variable is missing. Falling back to public RPC (not recommended for production).");
 }
 if (!walletConnectProjectId) {
-    // WalletConnect might partially work without it, but show a clear warning.
-    console.error("Configuration Error: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID environment variable is not set. Wallet connections may fail or be unreliable.");
-    // Consider throwing an error in production builds if this is absolutely required:
-    // if (process.env.NODE_ENV === 'production') {
-    //   throw new Error("Missing critical environment variable: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID");
-    // }
+  // WalletConnect might partially work without it, but show a clear warning.
+  console.error("Configuration Error: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID environment variable is not set. Wallet connections may fail or be unreliable.");
+  // Consider throwing an error in production builds if this is absolutely required:
+  // if (process.env.NODE_ENV === 'production') {
+  //   throw new Error("Missing critical environment variable: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID");
+  // }
 }
 // --- End Validation ---
 
@@ -38,8 +48,8 @@ const config = getDefaultConfig({
   // This tells Wagmi how to communicate with the Base network.
   transports: {
     [base.id]: http( // Use the 'http' transport
-        // Construct the Infura RPC URL. Use public RPC as a fallback if key is missing.
-        infuraApiKey
+      // Construct the Infura RPC URL. Use public RPC as a fallback if key is missing.
+      infuraApiKey
         ? `https://base-mainnet.infura.io/v3/${infuraApiKey}`
         : 'https://mainnet.base.org' // Public fallback - rate limits apply!
     ),
@@ -65,15 +75,15 @@ export default function App({ Component, pageProps }) {
         {/* RainbowKitProvider adds the wallet connection UI components and logic */}
         {/* Theme and other customizations can be applied here */}
         <RainbowKitProvider
-           theme={lightTheme({ // Example: Apply a light theme with custom accent
-             accentColor: '#0052FF', // Base blue-ish color
-             accentColorForeground: 'white',
-             borderRadius: 'medium',
-           })}
-           modalSize="compact" // Use a more compact modal for connection options
+          theme={lightTheme({ // Example: Apply a light theme with custom accent
+            accentColor: '#0052FF', // Base blue-ish color
+            accentColorForeground: 'white',
+            borderRadius: 'medium',
+          })}
+          modalSize="compact" // Use a more compact modal for connection options
         >
           {/* This renders the actual page component being visited */}
-          <Component {...pageProps} />
+          <Component className={`${clash.className} ${chaney.className}`} {...pageProps} />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
