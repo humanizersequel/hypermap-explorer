@@ -15,7 +15,7 @@ export default function Copier({ text }) {
 
     return (
         <button
-            className="bg-black/10 dark:bg-white/10 p-2 rounded-md thin text-[12px]"
+            className="clear thin"
             onClick={handleCopy}
             disabled={copied}
         >

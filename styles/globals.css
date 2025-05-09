@@ -125,8 +125,8 @@ button[type='submit'],
 
   &.thin {
     padding: 0.25rem 0.5rem;
-    border: none;
     font-weight: normal;
+    color: inherit;
   }
 
   &.icon {
@@ -153,6 +153,10 @@ button[type='submit'],
 code {
   font-weight: normal;
   background-color: var(--foreground-xtr);
+  word-wrap: break-word;
+  word-break: break-all;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
 }
 
 @media (prefers-color-scheme: dark) {
