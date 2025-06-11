@@ -3,7 +3,7 @@
 import { FaChevronLeft, FaChevronRight, FaCircleNotch, FaX } from 'react-icons/fa6';
 import classNames from 'classnames';
 import { useRouter } from 'next/router';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -13,7 +13,12 @@ import NamespaceInfo from '../components/NamespaceInfo';
 
 // Helper component to render notes/facts section
 function RenderNotesOrFacts({ title, items }) {
-  if (!items || Object.keys(items).length === 0) {
+  const length = useMemo(() => {
+    if (!items || Object.keys(items).length === 0) return 0;
+    return Object.keys(items).length;
+  }, [items]);
+  
+  if (!items || length === 0) {
     return (
       <>
         <h2>{title}</h2>
@@ -21,7 +26,7 @@ function RenderNotesOrFacts({ title, items }) {
       </>
     );
   }
-  const length = useMemo(() => Object.keys(items).length, [items]);
+  
   return (
     <>
       <h2>{title}</h2>
@@ -81,7 +86,7 @@ export default function EntryPage() {
   const [filter, setFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const onSearch = (term) => {
+  const onSearch = useCallback((term) => {
     if (!entryData) return;
     if (term) {
       setFilter(term);
@@ -89,7 +94,7 @@ export default function EntryPage() {
       setFilter('');
     }
     setCurrentPage(1);
-  }
+  }, [entryData])
 
   // useEffect runs client-side after component mounts and when dependencies change
   useEffect(() => {
@@ -130,7 +135,6 @@ export default function EntryPage() {
           if (entryHash && data[entryHash]) {
             console.log("useEffect: Data fetched successfully:", data[entryHash]);
             setEntryData(data[entryHash]); // Update state with the fetched data
-            onSearch();
           } else {
             // This indicates an unexpected response format from the API
             throw new Error("Received unexpected data format from API.");
