@@ -4,7 +4,7 @@
 import { queryDatabase } from '../../../utils/db';
 
 const BATCH_SIZE = 50;
-const NAMESPACE_PATTERN = '%grid.hypr'; // Entries ending with grid.hypr (e.g., provider1.grid.hypr)
+const NAMESPACE_PATTERN = '%grid.hypr%'; // Entries containing grid.hypr in the path
 
 export default async function handler(req, res) {
   // Only allow GET requests
