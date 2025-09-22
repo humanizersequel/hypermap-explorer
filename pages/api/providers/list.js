@@ -4,7 +4,7 @@
 import { queryDatabase } from '../../../utils/db';
 
 const BATCH_SIZE = 50;
-const NAMESPACE_PREFIX = 'grid.hypr';
+const NAMESPACE_PATTERN = '%grid.hypr'; // Entries ending with grid.hypr (e.g., provider1.grid.hypr)
 
 export default async function handler(req, res) {
   // Only allow GET requests
@@ -26,7 +26,8 @@ export default async function handler(req, res) {
     let queryParams;
 
     if (cursor) {
-      // Fetch next batch using cursor
+      // Simplified cursor approach - just use namehash for ordering
+      // This is more reliable and doesn't require complex subqueries
       entriesQuery = `
         SELECT
           e.namehash,
@@ -41,36 +42,17 @@ export default async function handler(req, res) {
         FROM entries e
         WHERE
           e.full_name LIKE $1
-          AND e.last_update_block <= (
-            SELECT last_update_block
-            FROM entries
-            WHERE namehash = $2
-          )
-          AND (
-            e.last_update_block < (
-              SELECT last_update_block
-              FROM entries
-              WHERE namehash = $2
-            )
-            OR (
-              e.last_update_block = (
-                SELECT last_update_block
-                FROM entries
-                WHERE namehash = $2
-              )
-              AND e.namehash < $2
-            )
-          )
+          AND e.namehash < $2
           AND EXISTS (
             SELECT 1
             FROM notes n
             WHERE n.entry_hash = e.namehash
             AND n.label = '~provider-name'
           )
-        ORDER BY e.last_update_block DESC, e.namehash DESC
+        ORDER BY e.namehash DESC
         LIMIT $3
       `;
-      queryParams = [`${NAMESPACE_PREFIX}%`, cursor, BATCH_SIZE];
+      queryParams = [NAMESPACE_PATTERN, cursor, BATCH_SIZE];
     } else {
       // Initial load - no cursor
       entriesQuery = `
@@ -93,10 +75,10 @@ export default async function handler(req, res) {
             WHERE n.entry_hash = e.namehash
             AND n.label = '~provider-name'
           )
-        ORDER BY e.last_update_block DESC, e.namehash DESC
+        ORDER BY e.namehash DESC
         LIMIT $2
       `;
-      queryParams = [`${NAMESPACE_PREFIX}%`, BATCH_SIZE];
+      queryParams = [NAMESPACE_PATTERN, BATCH_SIZE];
     }
 
     // Execute the main query
@@ -190,7 +172,7 @@ export default async function handler(req, res) {
             AND n.label = '~provider-name'
           )
       `;
-      const countResult = await queryDatabase(countQuery, [`${NAMESPACE_PREFIX}%`]);
+      const countResult = await queryDatabase(countQuery, [NAMESPACE_PATTERN]);
       totalCount = parseInt(countResult.rows[0].total);
       console.log(`Total provider count: ${totalCount}`);
     }
