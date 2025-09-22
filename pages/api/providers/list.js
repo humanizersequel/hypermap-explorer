@@ -26,8 +26,7 @@ export default async function handler(req, res) {
     let queryParams;
 
     if (cursor) {
-      // Simplified cursor approach - just use namehash for ordering
-      // This is more reliable and doesn't require complex subqueries
+      // Cursor-based pagination - get next batch
       entriesQuery = `
         SELECT
           e.namehash,
@@ -43,18 +42,12 @@ export default async function handler(req, res) {
         WHERE
           e.full_name LIKE $1
           AND e.namehash < $2
-          AND EXISTS (
-            SELECT 1
-            FROM notes n
-            WHERE n.entry_hash = e.namehash
-            AND n.label = '~provider-name'
-          )
         ORDER BY e.namehash DESC
         LIMIT $3
       `;
       queryParams = [NAMESPACE_PATTERN, cursor, BATCH_SIZE];
     } else {
-      // Initial load - no cursor
+      // Initial load
       entriesQuery = `
         SELECT
           e.namehash,
@@ -69,12 +62,6 @@ export default async function handler(req, res) {
         FROM entries e
         WHERE
           e.full_name LIKE $1
-          AND EXISTS (
-            SELECT 1
-            FROM notes n
-            WHERE n.entry_hash = e.namehash
-            AND n.label = '~provider-name'
-          )
         ORDER BY e.namehash DESC
         LIMIT $2
       `;
@@ -98,7 +85,7 @@ export default async function handler(req, res) {
     // Get all entry hashes for batch fetching notes
     const entryHashes = entries.map(e => e.namehash);
 
-    // Fetch all notes for these entries in one query
+    // Fetch notes for these entries (description, price, etc.)
     const notesQuery = `
       SELECT
         entry_hash,
@@ -112,7 +99,7 @@ export default async function handler(req, res) {
       FROM notes
       WHERE
         entry_hash = ANY($1::text[])
-        AND label IN ('~provider-name', '~description', '~price', '~status')
+        AND label IN ('~description', '~price', '~status')
       ORDER BY block_number DESC, log_index DESC
     `;
     const notesResult = await queryDatabase(notesQuery, [entryHashes]);
@@ -136,7 +123,7 @@ export default async function handler(req, res) {
       }
     });
 
-    // Build provider objects
+    // Build provider objects - use entry label as provider name
     const providers = entries.map(entry => ({
       namehash: entry.namehash,
       label: entry.label,
@@ -145,7 +132,7 @@ export default async function handler(req, res) {
       owner: entry.owner,
       gene: entry.gene,
       tba: entry.tba,
-      providerName: notesByEntry[entry.namehash]?.['~provider-name']?.data || entry.label,
+      providerName: entry.label, // Use entry label as provider name
       description: notesByEntry[entry.namehash]?.['~description']?.data || null,
       price: notesByEntry[entry.namehash]?.['~price']?.data || null,
       status: notesByEntry[entry.namehash]?.['~status']?.data || 'active',
@@ -163,14 +150,7 @@ export default async function handler(req, res) {
       const countQuery = `
         SELECT COUNT(*) as total
         FROM entries e
-        WHERE
-          e.full_name LIKE $1
-          AND EXISTS (
-            SELECT 1
-            FROM notes n
-            WHERE n.entry_hash = e.namehash
-            AND n.label = '~provider-name'
-          )
+        WHERE e.full_name LIKE $1
       `;
       const countResult = await queryDatabase(countQuery, [NAMESPACE_PATTERN]);
       totalCount = parseInt(countResult.rows[0].total);
